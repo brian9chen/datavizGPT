@@ -42,39 +42,40 @@ class SecureVisualizer():
         data_summary = self.summarize_data()
         n_obs = self.data.shape[0]
         counter = 1
-        for var_name, var_summary in data_summary:
+        for var_name, var_summary in data_summary.items():
             var_type = var_summary['type']
+            var_stats = var_summary['stats']
             if (var_type == "numeric"):
+                print(var_name, var_type, var_summary)
                 prompt = f"""
-                    Variable # {str(counter)} is {var_name}. \
-                    It consists of {var_type} data and has {n_obs} datapoints. \
-                    This variable's mean is {str(var_summary['mean'])}. \
-                    Its standard deviation is {str(var_summary['sd'])}. \
-                    Its minimum value is {str(var_summary['min'])}. \
-                    Its maximum value is {str(var_summary['max'])}. \
+                    Variable # {str(counter)} is {var_name}.
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's mean is {str(round(var_stats['mean'], 3))}.
+                    Its standard deviation is {str(round(var_stats['sd']))}.
+                    Its minimum value is {str(round(var_stats['min']))}.
+                    Its maximum value is {str(round(var_stats['max']))}.
                 """
             elif (var_type == "categorical"):
                 prompt = f"""
-                    Variable # {str(counter)} is {var_name}. \
-                    It consists of {var_type} data and has {n_obs} datapoints. \
-                    This variable's has {str(var_summary['nunique'])} unique categories. \
+                    Variable # {str(counter)} is {var_name}.
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's has {str(round(var_stats['nunique']))} unique categories.
                 """
             elif (var_type == "datetime"):
                 prompt = f"""
-                    Variable # {str(counter)} is {var_name}. \
-                    It consists of {var_type} data and has {n_obs} datapoints. \
-                    This variable's mean is {str(var_summary['mean'])}. \
-                    Its standard deviation is {str(var_summary['sd'])}. \
-                    Its minimum value is {str(var_summary['min'])}. \
-                    Its maximum value is {str(var_summary['max'])}. \
+                    Variable # {str(counter)} is {var_name}.
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's minimum value is {str(round(var_stats['min']))}.
+                    Its maximum value is {str(round(var_stats['max']))}. 
+                    It has {str(round(var_stats['nunique']))} unique values.
                 """
             counter = counter + 1
         # Add other notes to prompt
         prompt = f"""
-            {prompt} Please only print out the Python code \
-            (using the same variable names) to create the  \
-            best or most creative visualization of these variables.  \
-            Here are a few additional notes for guidance: {self.notes}  \
+            {prompt} Please only print out the Python code 
+            (using the same variable names) to create the
+            best or most creative visualization of these variables.
+            Here are a few additional notes for guidance: {self.notes}
         """
         # Save prompt as attribute
         self.prompt = prompt
@@ -123,8 +124,8 @@ class SecureVisualizer():
             )
             return
         # Separate variable types
-        df_subset = self.data[self.vars]
-        numeric_vars = df_subset.select_dtypes(include='numeric')
+        df_subset = self.data[self.var_names]
+        numeric_vars = df_subset.select_dtypes(include='number')
         categorical_vars = df_subset.select_dtypes(include='category')
         datetime_vars = df_subset.select_dtypes(include='datetime')
         # Extract variable summary
