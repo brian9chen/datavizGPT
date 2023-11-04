@@ -33,7 +33,7 @@ def visualize(
         # Send prompt to OpenAI API here
     else:
         easygui.msgbox(
-            msg='Prompt not validated - canceling (no information was sent).',
+            msg='Canceling prompt (no information was sent).',
             title='Prompt canceled'
         )
         return "Canceled"
@@ -45,8 +45,7 @@ if __name__ == "__main__":
     data = fetch_ucirepo(id=890).data.original
     var_names = ['time', 'oprior', 'symptom']
 
-    import main
-    result = main.visualize(
+    result = visualize(
         data=data,
         var_names=["time", "age", "symptom"],
         notes="The outcome variable is var2. Place var2 on the y-axis."
