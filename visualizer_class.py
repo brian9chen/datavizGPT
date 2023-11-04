@@ -1,9 +1,13 @@
 """Functions to create prompt based on summarized data and user input."""
-
+import os
 from typing import Dict, List, Optional
+
 import pandas as pd
 
 import easygui
+import openai
+
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 class SecureVisualizer():
     """
@@ -13,6 +17,7 @@ class SecureVisualizer():
         notes: optional user-specified notes to include with API call
         prompt: string prompt to pass to OpenAI API; default set to "None"
         prompt_verified: boolean indicating whether user has validated prompt
+        response: string response from OpenAI API; default set to "None"
 
     Methods
     
@@ -29,6 +34,7 @@ class SecureVisualizer():
         self.notes = notes
         self.prompt = "None"
         self.prompt_verified = False
+        self.response = "None"
 
     def create_prompt(self) -> None:
         """Format prompt for OpenAI API based on data summary and user inputs."""
@@ -53,6 +59,19 @@ class SecureVisualizer():
             choices=('Yes', 'No'),
         )
 
+    def send_prompt_and_get_response(self, model="gpt-3.5-turbo"):
+        messages = [{"role": "user", "content": self.prompt}]
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=0, # degree of randomness of the model's output
+        )
+        self.response = response.choices[0].message["content"]
+
+    def launch_local_streamlit_app(self) -> None:
+        """Launch Streamlit app on local server to visualize data."""
+        pass
+
     def summarize_data(self) -> Dict:
         """Extract variable types and statistical properties of data.
 
@@ -66,13 +85,11 @@ class SecureVisualizer():
                 'Please verify that variable names are spelled correctly.'
             )
             return
-
-        # Determine variable types (require different statistics)
+        # Separate variable types
         df_subset = self.data[self.vars]
         numeric_vars = df_subset.select_dtypes(include='numeric')
         categorical_vars = df_subset.select_dtypes(include='category')
         datetime_vars = df_subset.select_dtypes(include='datetime')
-
         # Extract variable summary
         vars_dict = {}
         for var in self.var_names:
