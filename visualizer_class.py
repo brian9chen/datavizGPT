@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Optional
 import pandas as pd
+
 import easygui
 
 class SecureVisualizer():
@@ -31,7 +32,7 @@ class SecureVisualizer():
 
     def create_prompt(self) -> None:
         """Format prompt for OpenAI API based on data summary and user inputs."""
-        data_summary = self.summarize_data(self.data, self.var_names)
+        data_summary = self.summarize_data()
         notes = self.notes
         prompt = ""
         #TODO: create prompt based on data summary and user notes
@@ -85,21 +86,56 @@ class SecureVisualizer():
         Returns
             dictionary of {var_names:{var_types, statistics}}
         """
+        # Check that all variables exist in data
         if not all([var in self.data.columns for var in self.var_names]):
             raise ValueError(
                 'One or more variable(s) not found in dataframe.'+
                 'Please verify that variable names are spelled correctly.'
             )
             return
+
+        # Determine variable types (require different statistics)
+        df_subset = self.data[self.vars]
+        numeric_vars = df_subset.select_dtypes(include='numeric')
+        categorical_vars = df_subset.select_dtypes(include='category')
+        datetime_vars = df_subset.select_dtypes(include='datetime')
+
+        # Extract variable summary
         vars_dict = {}
         for var in self.var_names:
-            vars_dict[var] = {
-                'type':str(self.data[var].dtype),
-                'stats':{
-                    'mean':self.data[var].mean(),
-                    'sd':self.data[var].std(),
-                    'min':self.data[var].min(),
-                    'max':self.data[var].max(),
+            if var in numeric_vars:
+                vars_dict[var] = {
+                    'type':'numeric',
+                    'stats':{
+                        'size':self.data[var].count(),
+                        'mean':self.data[var].mean(),
+                        'sd':self.data[var].std(),
+                        'min':self.data[var].min(),
+                        'max':self.data[var].max(),
+                    }
                 }
-            }
+            elif var in categorical_vars:
+                vars_dict[var] = {
+                    'type':'categorical',
+                    'stats':{
+                        'size':self.count(),
+                        'nunique':self.data[var].nunique(),
+                    }
+                }
+            elif var in datetime_vars:
+                vars_dict[var] = {
+                    'type':'datetime',
+                    'stats':{
+                        'size':self.count(),
+                        'min':self.data[var].min(),
+                        'max':self.data[var].max(),
+                        'nunique':self.data[var].nunique(),
+                    }
+                }
+            else:
+                print(f'Variable "{var}" is not numeric, categorical, or '+
+                      'datetime type and cannot currently be handled.')
+                self.var_names = self.var_names.remove(var)
+                continue
+
         return vars_dict
