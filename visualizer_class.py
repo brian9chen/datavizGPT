@@ -8,8 +8,9 @@ import pandas as pd
 
 import easygui
 import openai
-
 openai.api_key = os.environ["OPENAI_API_KEY"]
+
+import LocalStreamlitApp
 
 class SecureVisualizer():
     """
@@ -30,7 +31,7 @@ class SecureVisualizer():
         var_names: List[str],
         notes: Optional[str],
     ) -> None:
-        "Sets class attributes"
+        "Initialize class with attributes."
         self.data = data
         self.var_names = var_names
         self.notes = notes
@@ -78,7 +79,9 @@ class SecureVisualizer():
             Please print out the Python code to create the
             best or most creative visualization of these variables 
             using the same variable names. Refer to the pandas DataFrame object
-            in your code as "data". Here are a few additional notes for guidance:
+            in your code as "data". Do not return the DataFrame, just the code
+            for the plots.
+            Here are a few additional notes for guidance:
             {self.notes}
         """) 
 
@@ -109,8 +112,9 @@ class SecureVisualizer():
 
     def launch_local_streamlit_app(self) -> None:
         """Launch Streamlit app on local server to visualize data."""
-        pass
-
+        app = LocalStreamlitApp(self.data, self.prompt, self.response)
+        app.run_UI()
+    
     def summarize_data(self) -> Dict:
         """Extract variable types and statistical properties of data.
 

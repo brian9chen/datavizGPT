@@ -12,8 +12,7 @@ def visualize(
     var_names: List[str],
     notes: Optional[str],
 ) -> None:
-    """Visualize notional data (with similar data types and 
-    statistical properties as original data) in Streamlit app.
+    """Visualize 
     
     Args
         data: pandas DataFrame of original data set
@@ -30,9 +29,8 @@ def visualize(
     if visualizer.prompt_verified:
         visualizer.send_prompt_and_get_response()
         visualizer.launch_local_streamlit_app()
-        
-        
-        return "Success!"
+        return visualizer.response
+
     else:
         easygui.msgbox(
             msg='Canceling prompt (no information was sent).',
@@ -45,11 +43,11 @@ if __name__ == "__main__":
     # Import example data set
     from ucimlrepo import fetch_ucirepo 
     data = fetch_ucirepo(id=890).data.original
-    var_names = ['time', 'oprior', 'symptom']
+    var_names = ['time', 'age', 'symptom']
 
     result = visualize(
         data=data,
-        var_names=["time", "age", "symptom"],
+        var_names=var_names,
         notes="The outcome variable is \"symptom\". Place \"symptom\" on the y-axis."
     )
     print(result)
