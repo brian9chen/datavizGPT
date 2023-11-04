@@ -31,7 +31,7 @@ class SecureVisualizer():
 
     def create_prompt(self) -> None:
         """Format prompt for OpenAI API based on data summary and user inputs."""
-        data_summary = self.summarize_data(self.data, self.var_names)
+        data_summary = self.summarize_data()
         prompt = "Test"
         #TODO: create prompt based on data summary and user notes
         self.prompt = prompt
