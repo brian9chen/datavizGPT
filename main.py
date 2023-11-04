@@ -28,7 +28,7 @@ def visualize(
     visualizer.request_user_verification()
     if visualizer.prompt_verified:
         visualizer.send_prompt_and_get_response()
-        visualizer.launch_local_streamlit_app()
+        # visualizer.launch_local_streamlit_app()
         return visualizer.response
 
     else:
@@ -48,6 +48,6 @@ if __name__ == "__main__":
     result = visualize(
         data=data,
         var_names=var_names,
-        notes="The outcome variable is \"symptom\". Place \"symptom\" on the y-axis."
+        notes="The outcome variable is 'symptom'. Place 'symptom' on the y-axis."
     )
     print(result)

@@ -10,7 +10,7 @@ import easygui
 import openai
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-import LocalStreamlitApp
+from local_streamlit_class import LocalStreamlitApp
 
 class SecureVisualizer():
     """
@@ -53,36 +53,37 @@ class SecureVisualizer():
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
                     This variable's mean is {str(round(var_stats['mean'], 3))}.
-                    Its standard deviation is {str(round(var_stats['sd']))}.
-                    Its minimum value is {str(round(var_stats['min']))}.
-                    Its maximum value is {str(round(var_stats['max']))}.
+                    Its standard deviation is {str(round(var_stats['sd'], 3))}.
+                    Its minimum value is {str(round(var_stats['min'], 3))}.
+                    Its maximum value is {str(round(var_stats['max'], 3))}.
                 """)
             elif (var_type == "categorical"):
                 var_prompt = textwrap.dedent(f"""
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
-                    This variable's has {str(round(var_stats['nunique']))} unique categories.
+                    This variable's has {str(round(var_stats['nunique'], 3))} unique categories.
                 """)
             elif (var_type == "datetime"):
                 var_prompt = textwrap.dedent(f"""
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
-                    This variable's minimum value is {str(round(var_stats['min']))}.
-                    Its maximum value is {str(round(var_stats['max']))}. 
-                    It has {str(round(var_stats['nunique']))} unique values.
+                    This variable's minimum value is {str(round(var_stats['min'], 3))}.
+                    Its maximum value is {str(round(var_stats['max'], 3))}. 
+                    It has {str(round(var_stats['nunique'], 3))} unique values.
                 """)
             counter = counter + 1
             # Save variable prompt to full prompt attribute
             self.prompt += var_prompt
         # Add other notes to prompt
         self.prompt += textwrap.dedent(f"""
-            Please print out the Python code to create the
-            best or most creative visualization of these variables 
-            using the same variable names. Refer to the pandas DataFrame object
-            in your code as "data". Do not return the DataFrame, just the code
-            for the plots.
-            Here are a few additional notes for guidance:
-            {self.notes}
+            Create three separate data visualizations that each include all of
+            the variables in {self.var_names}. Return the Python code
+            for each visualization as a separate text file.
+            Use the original variable names in the code.
+            Refer to the pandas DataFrame object in your code as "data".
+            Adhere to the following guidelines enclosed in <> when creating 
+            each of the three data visualizations:
+            <{self.notes}>
         """) 
 
     def request_user_verification(self) -> None:
