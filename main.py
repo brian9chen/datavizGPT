@@ -23,12 +23,15 @@ def visualize(
     Returns
         None
     """
+    # Instantiate visualizer class
     visualizer = SecureVisualizer(data, var_names, notes)
     visualizer.create_prompt()
     visualizer.request_user_verification()
     if visualizer.prompt_verified:
+        
+        
+        
         return "Success!"
-        # Send prompt to OpenAI API here
     else:
         easygui.msgbox(
             msg='Canceling prompt (no information was sent).',
