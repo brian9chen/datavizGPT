@@ -124,7 +124,6 @@ class SecureVisualizer():
                 vars_dict[var] = {
                     'type':'numeric',
                     'stats':{
-                        'size':self.data[var].count(),
                         'mean':self.data[var].mean(),
                         'sd':self.data[var].std(),
                         'min':self.data[var].min(),
@@ -135,7 +134,6 @@ class SecureVisualizer():
                 vars_dict[var] = {
                     'type':'categorical',
                     'stats':{
-                        'size':self.count(),
                         'nunique':self.data[var].nunique(),
                     }
                 }
@@ -143,7 +141,6 @@ class SecureVisualizer():
                 vars_dict[var] = {
                     'type':'datetime',
                     'stats':{
-                        'size':self.count(),
                         'min':self.data[var].min(),
                         'max':self.data[var].max(),
                         'nunique':self.data[var].nunique(),
