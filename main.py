@@ -30,9 +30,8 @@ def visualize(
     if visualizer.prompt_verified:
         visualizer.send_prompt_and_get_response()
         visualizer.launch_local_streamlit_app()
-        
-        
-        return "Success!"
+        return visualizer.response
+
     else:
         easygui.msgbox(
             msg='Canceling prompt (no information was sent).',
