@@ -3,9 +3,9 @@
 from typing import List, Optional
 
 import pandas as pd
-
 import easygui
-import create_prompt; import send_prompt
+
+from visualizer_class import SecureVisualizer
 
 def visualize(
     data: pd.DataFrame,
@@ -23,12 +23,10 @@ def visualize(
     Returns
         None
     """
-    prompt = create_prompt.create_prompt(
-        data=data,
-        var_names=var_names,
-        notes=notes,
-    )
-    if create_prompt.user_verified_prompt(prompt):
+    visualizer = SecureVisualizer(data, var_names, notes)
+    visualizer.create_prompt()
+    visualizer.request_user_verification()
+    if visualizer.prompt_verified:
         return "Success!"
         # Send prompt to OpenAI API here
     else:
