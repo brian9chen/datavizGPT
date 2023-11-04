@@ -32,9 +32,36 @@ class SecureVisualizer():
     def create_prompt(self) -> None:
         """Format prompt for OpenAI API based on data summary and user inputs."""
         data_summary = self.summarize_data(self.data, self.var_names)
-        prompt = "Test"
+        notes = self.notes
+        prompt = ""
         #TODO: create prompt based on data summary and user notes
+
+        counter = 1
+        
+        for var in data_summary:
+            type = var['type']
+            size = var['size']
+            stats = var['stats']
+            
+            mean = stats['mean']
+            sd = stats['sd']
+            min = stats['min']
+            max = stats['max']
+            
+            temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
+            temp_prompt = temp_prompt + "It's type is " + type + " and it has " + str(size) + " datapoints. "
+            temp_prompt = temp_prompt + "This variable has a mean of " + str(mean) + ", standard deviation of " + str(sd)
+            temp_prompt = temp_prompt + ", mininum of " + str(min) + ", and a maximum of " + str(max) + ". "
+            
+            prompt = prompt + temp_prompt
+            counter = counter + 1
+            
+        prompt = prompt + "Please just print out the Python code (using the same variable names) to create the best visualization of these variables. "
+        prompt = prompt + "Here are a few additional notes for guidance: " + notes
+        
         self.prompt = prompt
+        
+        print(prompt)
 
     def request_user_verification(self) -> None:
         """Validate with user that prompt should be passed to OpenAI API."""
