@@ -1,5 +1,7 @@
-"""Functions to create prompt based on summarized data and user input."""
+"""Visualizer class to generate OpenAPI prompt and call Streamlit app."""
+
 import os
+import textwrap
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -15,9 +17,9 @@ class SecureVisualizer():
         data: pandas DataFrame of original data set
         var_names: list of strings containing variable names to summarize
         notes: optional user-specified notes to include with API call
-        prompt: string prompt to pass to OpenAI API; default set to "None"
+        prompt: string prompt to pass to OpenAI API; default is empty string
         prompt_verified: boolean indicating whether user has validated prompt
-        response: string response from OpenAI API; default set to "None"
+        response: string response from OpenAI API; default is empty string
 
     Methods
     
@@ -32,53 +34,53 @@ class SecureVisualizer():
         self.data = data
         self.var_names = var_names
         self.notes = notes
-        self.prompt = "None"
+        self.prompt = ""
         self.prompt_verified = False
-        self.response = "None"
+        self.response = ""
 
     def create_prompt(self) -> None:
-        """Format prompt for OpenAI API based on data summary and user inputs."""
+        """Create prompt for OpenAI API based on data summary and user inputs."""
         data_summary = self.summarize_data()
-        notes = self.notes
-        prompt = ""
-        #TODO: create prompt based on data summary and user notes
-
+        n_obs = self.data.shape[0]
         counter = 1
-        
-        for var in data_summary:
-            type = var['type']
-            
-            if (type == "numeric"):
-                stats = var['stats']
-                
-                size = stats['size']
-                mean = stats['mean']
-                sd = stats['sd']
-                min = stats['min']
-                max = stats['max']
-            
-                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
-                temp_prompt = temp_prompt + "It consists of " + type + " data and it has " + str(size) + " datapoints. "
-                temp_prompt = temp_prompt + "This variable has a mean of " + str(mean) + ", standard deviation of " + str(sd)
-                temp_prompt = temp_prompt + ", mininum of " + str(min) + ", and a maximum of " + str(max) + ". "
-                
-            elif (type == "categorical"):
-                stats = var['stats']
-                size = stats['size']
-                nunique = stats['nunique']
-                
-                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
-                temp_prompt = temp_prompt + "There are " + str(nunique) + " categories, each with " + str(size) + " datapoints."
-            
-            prompt = prompt + temp_prompt
+        for var_name, var_summary in data_summary.items():
+            var_prompt = ""
+            var_type = var_summary['type']
+            var_stats = var_summary['stats']
+            if (var_type == "numeric"):
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's mean is {str(round(var_stats['mean'], 3))}.
+                    Its standard deviation is {str(round(var_stats['sd']))}.
+                    Its minimum value is {str(round(var_stats['min']))}.
+                    Its maximum value is {str(round(var_stats['max']))}.
+                """)
+            elif (var_type == "categorical"):
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's has {str(round(var_stats['nunique']))} unique categories.
+                """)
+            elif (var_type == "datetime"):
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
+                    It consists of {var_type} data and has {n_obs} datapoints.
+                    This variable's minimum value is {str(round(var_stats['min']))}.
+                    Its maximum value is {str(round(var_stats['max']))}. 
+                    It has {str(round(var_stats['nunique']))} unique values.
+                """)
             counter = counter + 1
-            
-        prompt = prompt + "Please just print out the Python code (using the same variable names) to create the best visualization of these variables. "
-        prompt = prompt + "Here are a few additional notes for guidance: " + notes
-        
-        self.prompt = prompt
-        
-        print(prompt)
+            # Save variable prompt to full prompt attribute
+            self.prompt += var_prompt
+        # Add other notes to prompt
+        self.prompt += textwrap.dedent(f"""
+            Please print out the Python code to create the
+            best or most creative visualization of these variables 
+            using the same variable names. Refer to the pandas DataFrame object
+            in your code as "data". Here are a few additional notes for guidance:
+            {self.notes}
+        """) 
 
     def request_user_verification(self) -> None:
         """Validate with user that prompt should be passed to OpenAI API."""
@@ -123,8 +125,8 @@ class SecureVisualizer():
             )
             return
         # Separate variable types
-        df_subset = self.data[self.vars]
-        numeric_vars = df_subset.select_dtypes(include='numeric')
+        df_subset = self.data[self.var_names]
+        numeric_vars = df_subset.select_dtypes(include='number')
         categorical_vars = df_subset.select_dtypes(include='category')
         datetime_vars = df_subset.select_dtypes(include='datetime')
         # Extract variable summary

@@ -50,6 +50,6 @@ if __name__ == "__main__":
     result = visualize(
         data=data,
         var_names=["time", "age", "symptom"],
-        notes="The outcome variable is var2. Place var2 on the y-axis."
+        notes="The outcome variable is \"symptom\". Place \"symptom\" on the y-axis."
     )
     print(result)
