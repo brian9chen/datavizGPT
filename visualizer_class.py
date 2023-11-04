@@ -1,6 +1,7 @@
 """Visualizer class to generate OpenAPI prompt and call Streamlit app."""
 
 import os
+import textwrap
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -16,9 +17,9 @@ class SecureVisualizer():
         data: pandas DataFrame of original data set
         var_names: list of strings containing variable names to summarize
         notes: optional user-specified notes to include with API call
-        prompt: string prompt to pass to OpenAI API; default set to "None"
+        prompt: string prompt to pass to OpenAI API; default is empty string
         prompt_verified: boolean indicating whether user has validated prompt
-        response: string response from OpenAI API; default set to "None"
+        response: string response from OpenAI API; default is empty string
 
     Methods
     
@@ -33,9 +34,9 @@ class SecureVisualizer():
         self.data = data
         self.var_names = var_names
         self.notes = notes
-        self.prompt = "None"
+        self.prompt = ""
         self.prompt_verified = False
-        self.response = "None"
+        self.response = ""
 
     def create_prompt(self) -> None:
         """Create prompt for OpenAI API based on data summary and user inputs."""
@@ -43,43 +44,43 @@ class SecureVisualizer():
         n_obs = self.data.shape[0]
         counter = 1
         for var_name, var_summary in data_summary.items():
+            var_prompt = ""
             var_type = var_summary['type']
             var_stats = var_summary['stats']
             if (var_type == "numeric"):
-                print(var_name, var_type, var_summary)
-                prompt = f"""
-                    Variable # {str(counter)} is {var_name}.
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
                     This variable's mean is {str(round(var_stats['mean'], 3))}.
                     Its standard deviation is {str(round(var_stats['sd']))}.
                     Its minimum value is {str(round(var_stats['min']))}.
                     Its maximum value is {str(round(var_stats['max']))}.
-                """
+                """)
             elif (var_type == "categorical"):
-                prompt = f"""
-                    Variable # {str(counter)} is {var_name}.
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
                     This variable's has {str(round(var_stats['nunique']))} unique categories.
-                """
+                """)
             elif (var_type == "datetime"):
-                prompt = f"""
-                    Variable # {str(counter)} is {var_name}.
+                var_prompt = textwrap.dedent(f"""
+                    The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
                     This variable's minimum value is {str(round(var_stats['min']))}.
                     Its maximum value is {str(round(var_stats['max']))}. 
                     It has {str(round(var_stats['nunique']))} unique values.
-                """
+                """)
             counter = counter + 1
+            # Save variable prompt to full prompt attribute
+            self.prompt += var_prompt
         # Add other notes to prompt
-        prompt = f"""
-            {prompt} Please only print out the Python code 
-            (using the same variable names) to create the
-            best or most creative visualization of these variables.
-            Here are a few additional notes for guidance: {self.notes}
-        """
-        # Save prompt as attribute
-        self.prompt = prompt
-        print(prompt)
+        self.prompt += textwrap.dedent(f"""
+            Please print out the Python code to create the
+            best or most creative visualization of these variables 
+            using the same variable names. Refer to the pandas DataFrame object
+            in your code as "data". Here are a few additional notes for guidance:
+            {self.notes}
+        """) 
 
     def request_user_verification(self) -> None:
         """Validate with user that prompt should be passed to OpenAI API."""
