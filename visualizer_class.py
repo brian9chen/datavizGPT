@@ -10,7 +10,7 @@ import easygui
 import openai
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-import LocalStreamlitApp
+from local_streamlit_class import LocalStreamlitApp
 
 class SecureVisualizer():
     """
@@ -76,13 +76,14 @@ class SecureVisualizer():
             self.prompt += var_prompt
         # Add other notes to prompt
         self.prompt += textwrap.dedent(f"""
-            Please print out the Python code to create the
-            best or most creative visualization of these variables 
-            using the same variable names. Refer to the pandas DataFrame object
-            in your code as "data". Do not return the DataFrame, just the code
-            for the plots.
-            Here are a few additional notes for guidance:
-            {self.notes}
+            Create three separate data visualizations that each include all of
+            the variables in {self.var_names}. Return the Python code
+            for each visualization as a separate text file.
+            Use the original variable names in the code.
+            Refer to the pandas DataFrame object in your code as "data".
+            Adhere to the following guidelines enclosed in <> when creating 
+            each of the three data visualizations:
+            <{self.notes}>
         """) 
 
     def request_user_verification(self) -> None:
