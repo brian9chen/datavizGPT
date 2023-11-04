@@ -53,23 +53,23 @@ class SecureVisualizer():
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
                     This variable's mean is {str(round(var_stats['mean'], 3))}.
-                    Its standard deviation is {str(round(var_stats['sd']))}.
-                    Its minimum value is {str(round(var_stats['min']))}.
-                    Its maximum value is {str(round(var_stats['max']))}.
+                    Its standard deviation is {str(round(var_stats['sd'], 3))}.
+                    Its minimum value is {str(round(var_stats['min'], 3))}.
+                    Its maximum value is {str(round(var_stats['max'], 3))}.
                 """)
             elif (var_type == "categorical"):
                 var_prompt = textwrap.dedent(f"""
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
-                    This variable's has {str(round(var_stats['nunique']))} unique categories.
+                    This variable's has {str(round(var_stats['nunique'], 3))} unique categories.
                 """)
             elif (var_type == "datetime"):
                 var_prompt = textwrap.dedent(f"""
                     The name of variable # {str(counter)} is "{var_name}".
                     It consists of {var_type} data and has {n_obs} datapoints.
-                    This variable's minimum value is {str(round(var_stats['min']))}.
-                    Its maximum value is {str(round(var_stats['max']))}. 
-                    It has {str(round(var_stats['nunique']))} unique values.
+                    This variable's minimum value is {str(round(var_stats['min'], 3))}.
+                    Its maximum value is {str(round(var_stats['max'], 3))}. 
+                    It has {str(round(var_stats['nunique'], 3))} unique values.
                 """)
             counter = counter + 1
             # Save variable prompt to full prompt attribute
