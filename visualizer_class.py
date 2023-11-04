@@ -41,18 +41,28 @@ class SecureVisualizer():
         
         for var in data_summary:
             type = var['type']
-            size = var['size']
-            stats = var['stats']
             
-            mean = stats['mean']
-            sd = stats['sd']
-            min = stats['min']
-            max = stats['max']
+            if (type == "numeric"):
+                stats = var['stats']
+                
+                size = stats['size']
+                mean = stats['mean']
+                sd = stats['sd']
+                min = stats['min']
+                max = stats['max']
             
-            temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
-            temp_prompt = temp_prompt + "It's type is " + type + " and it has " + str(size) + " datapoints. "
-            temp_prompt = temp_prompt + "This variable has a mean of " + str(mean) + ", standard deviation of " + str(sd)
-            temp_prompt = temp_prompt + ", mininum of " + str(min) + ", and a maximum of " + str(max) + ". "
+                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
+                temp_prompt = temp_prompt + "It consists of " + type + " data and it has " + str(size) + " datapoints. "
+                temp_prompt = temp_prompt + "This variable has a mean of " + str(mean) + ", standard deviation of " + str(sd)
+                temp_prompt = temp_prompt + ", mininum of " + str(min) + ", and a maximum of " + str(max) + ". "
+                
+            elif (type == "categorical"):
+                stats = var['stats']
+                size = stats['size']
+                nunique = stats['nunique']
+                
+                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
+                temp_prompt = temp_prompt + "There are " + str(nunique) + " categories, each with " + str(size) + " datapoints."
             
             prompt = prompt + temp_prompt
             counter = counter + 1
