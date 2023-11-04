@@ -28,7 +28,8 @@ def visualize(
     visualizer.create_prompt()
     visualizer.request_user_verification()
     if visualizer.prompt_verified:
-        
+        visualizer.send_prompt_and_get_response()
+        visualizer.launch_local_streamlit_app()
         
         
         return "Success!"
