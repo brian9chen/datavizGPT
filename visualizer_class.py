@@ -1,4 +1,5 @@
-"""Functions to create prompt based on summarized data and user input."""
+"""Visualizer class to generate OpenAPI prompt and call Streamlit app."""
+
 import os
 from typing import Dict, List, Optional
 
@@ -37,47 +38,46 @@ class SecureVisualizer():
         self.response = "None"
 
     def create_prompt(self) -> None:
-        """Format prompt for OpenAI API based on data summary and user inputs."""
+        """Create prompt for OpenAI API based on data summary and user inputs."""
         data_summary = self.summarize_data()
-        notes = self.notes
-        prompt = ""
-        #TODO: create prompt based on data summary and user notes
-
+        n_obs = self.data.shape[0]
         counter = 1
-        
-        for var in data_summary:
-            type = var['type']
-            
-            if (type == "numeric"):
-                stats = var['stats']
-                
-                size = stats['size']
-                mean = stats['mean']
-                sd = stats['sd']
-                min = stats['min']
-                max = stats['max']
-            
-                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
-                temp_prompt = temp_prompt + "It consists of " + type + " data and it has " + str(size) + " datapoints. "
-                temp_prompt = temp_prompt + "This variable has a mean of " + str(mean) + ", standard deviation of " + str(sd)
-                temp_prompt = temp_prompt + ", mininum of " + str(min) + ", and a maximum of " + str(max) + ". "
-                
-            elif (type == "categorical"):
-                stats = var['stats']
-                size = stats['size']
-                nunique = stats['nunique']
-                
-                temp_prompt = "Variable #" + str(counter) + " is " + var + ". "
-                temp_prompt = temp_prompt + "There are " + str(nunique) + " categories, each with " + str(size) + " datapoints."
-            
-            prompt = prompt + temp_prompt
+        for var_name, var_summary in data_summary:
+            var_type = var_summary['type']
+            if (var_type == "numeric"):
+                prompt = f"""
+                    Variable # {str(counter)} is {var_name}. \
+                    It consists of {var_type} data and has {n_obs} datapoints. \
+                    This variable's mean is {str(var_summary['mean'])}. \
+                    Its standard deviation is {str(var_summary['sd'])}. \
+                    Its minimum value is {str(var_summary['min'])}. \
+                    Its maximum value is {str(var_summary['max'])}. \
+                """
+            elif (var_type == "categorical"):
+                prompt = f"""
+                    Variable # {str(counter)} is {var_name}. \
+                    It consists of {var_type} data and has {n_obs} datapoints. \
+                    This variable's has {str(var_summary['nunique'])} unique categories. \
+                """
+            elif (var_type == "datetime"):
+                prompt = f"""
+                    Variable # {str(counter)} is {var_name}. \
+                    It consists of {var_type} data and has {n_obs} datapoints. \
+                    This variable's mean is {str(var_summary['mean'])}. \
+                    Its standard deviation is {str(var_summary['sd'])}. \
+                    Its minimum value is {str(var_summary['min'])}. \
+                    Its maximum value is {str(var_summary['max'])}. \
+                """
             counter = counter + 1
-            
-        prompt = prompt + "Please just print out the Python code (using the same variable names) to create the best visualization of these variables. "
-        prompt = prompt + "Here are a few additional notes for guidance: " + notes
-        
+        # Add other notes to prompt
+        prompt = f"""
+            {prompt} Please only print out the Python code \
+            (using the same variable names) to create the  \
+            best or most creative visualization of these variables.  \
+            Here are a few additional notes for guidance: {self.notes}  \
+        """
+        # Save prompt as attribute
         self.prompt = prompt
-        
         print(prompt)
 
     def request_user_verification(self) -> None:
