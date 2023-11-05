@@ -1,19 +1,15 @@
-"""Class to launch local Streamlit app"""
+"""Class to launch Streamlit app on local server"""
 
 import os
-import textwrap
+import re
+import subprocess
 from typing import Dict, List, Optional
+import webbrowser
 
 import pandas as pd
 
-import easygui
-import openai
-
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
 class LocalStreamlitApp:
     """
-    
     Attributes
         data: pandas DataFrame of original data set
         prompt: string prompt passed to OpenAI API
@@ -22,7 +18,6 @@ class LocalStreamlitApp:
     Methods
     
     """
-    
     def __init__(
         self,
         data: pd.DataFrame,
@@ -34,8 +29,18 @@ class LocalStreamlitApp:
         self.prompt = prompt
         self.response = response
 
-    def run(self) -> None:
-        pass
+    def run_UI(self) -> None:
+        parsed_response = self.parse_response()
+        command = ["streamlit", "run", "app2.py", f"-- {parsed_response}"]
+        process = subprocess.Popen(command, shell=True)
+        webbrowser.open_new_tab("http://localhost:8501") #TODO: figure out how to set port
+
+    def parse_response(self) -> List[str]:
+        """Parse OpenAI API response to extract code for visualization."""
+        return [re.split("visualization\n", self.response)[-1]]
+        
+        
+        
         
         
         

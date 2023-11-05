@@ -39,6 +39,11 @@ class SecureVisualizer():
         self.prompt_verified = False
         self.response = ""
 
+    def launch_local_streamlit_app(self) -> None:
+        """Launch Streamlit app on local server to visualize data."""
+        app = LocalStreamlitApp(self.data, self.prompt, self.response)
+        app.run_UI()
+    
     def create_prompt(self) -> None:
         """Create prompt for OpenAI API based on data summary and user inputs."""
         data_summary = self.summarize_data()
@@ -76,13 +81,13 @@ class SecureVisualizer():
             self.prompt += var_prompt
         # Add other notes to prompt
         self.prompt += textwrap.dedent(f"""
-            Create three separate data visualizations that each include all of
+            Create a data visualization that includes all of
             the variables in {self.var_names}. Return the Python code
-            for each visualization as a separate text file.
+            for the visualization as a separate text file.
             Use the original variable names in the code.
             Refer to the pandas DataFrame object in your code as "data".
             Adhere to the following guidelines enclosed in <> when creating 
-            each of the three data visualizations:
+            the data visualizations:
             <{self.notes}>
         """) 
 
@@ -111,11 +116,6 @@ class SecureVisualizer():
         )
         self.response = response.choices[0].message["content"]
 
-    def launch_local_streamlit_app(self) -> None:
-        """Launch Streamlit app on local server to visualize data."""
-        app = LocalStreamlitApp(self.data, self.prompt, self.response)
-        app.run_UI()
-    
     def summarize_data(self) -> Dict:
         """Extract variable types and statistical properties of data.
 
